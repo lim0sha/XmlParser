@@ -61,7 +61,6 @@ class XmlParserGroovy {
 
         tableNode.children().each { rowObj ->
             def rowData = [:]
-
             rowObj.attributes().each { key, value ->
                 rowData[key] = value?.toString() ?: ""
                 allColumns << key
@@ -72,6 +71,12 @@ class XmlParserGroovy {
                 def value = childNode.text()
                 rowData[key] = value
                 allColumns << key
+            }
+
+            def nodeText = rowObj.text()?.trim()
+            if (nodeText && !rowData.containsKey('name') && !rowData.containsKey('value')) {
+                rowData['name'] = nodeText
+                allColumns << 'name'
             }
 
             rows << rowData
@@ -108,12 +113,21 @@ class XmlParserGroovy {
 
     private List<String> extractColumns(GPathResult tableNode) {
         def columns = [] as Set
-        def firstRow = tableNode.children().find()
+        def children = tableNode.children()
 
-        if (firstRow) {
-            firstRow.attributes().keySet().each { columns << it.toString() }
-            firstRow.children().each { columns << it.name() }
+        int totalChildren = children.size()
+        int samplesToCheck = Math.min(totalChildren, 10)
+
+        for (int i = 0; i < samplesToCheck; i++) {
+            def rowNode = children[i]
+            rowNode.attributes().keySet().each { columns << it.toString() }
+            rowNode.children().each { columns << it.name() }
+            def nodeText = rowNode.text()?.trim()
+            if (nodeText && !nodeText.isEmpty()) {
+                columns << 'name'
+            }
         }
+
         return columns.toList()
     }
 }
