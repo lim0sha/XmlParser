@@ -82,7 +82,7 @@ class XmlParserGroovy {
             rows << rowData
         }
 
-        return new TableSchema(tableName, allColumns.toList(), rows)
+        return new TableSchema(tableName, allColumns.toList() as List<String>, rows)
     }
 
     private GPathResult parseRoot() {
@@ -103,7 +103,7 @@ class XmlParserGroovy {
         }
     }
 
-    private GPathResult findNode(GPathResult root, String name) {
+    private static GPathResult findNode(GPathResult root, String name) {
         def shopNode = root.children().find { it.name() == 'shop' }
         if (!shopNode) {
             return null
@@ -111,7 +111,7 @@ class XmlParserGroovy {
         return shopNode.children().find { it.name() == name }
     }
 
-    private List<String> extractColumns(GPathResult tableNode) {
+    private static List<String> extractColumns(GPathResult tableNode) {
         def columns = [] as Set
         def children = tableNode.children()
 
@@ -128,6 +128,6 @@ class XmlParserGroovy {
             }
         }
 
-        return columns.toList()
+        return columns.toList() as List<String>
     }
 }
