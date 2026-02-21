@@ -15,6 +15,8 @@
 ## Функционал
 Сервис, обрабатывающий xml по предоставленной ссылке.
 
+---
+
 ## Установка и запуск через Docker
 
 ### Сборка образа
@@ -101,6 +103,7 @@ CREATE TABLE IF NOT EXISTS offers (available TEXT, id TEXT PRIMARY KEY, url TEXT
 > exit
 ```
 
+---
 ## Отладка
 
 ### Подключение к БД
@@ -109,6 +112,76 @@ CREATE TABLE IF NOT EXISTS offers (available TEXT, id TEXT PRIMARY KEY, url TEXT
 docker exec -it xml_loader_db psql -U user -d testdb
 ```
 
+## Примеры работы с базой данных
+
+Ниже приведены примеры вывода команд внутри консоли PostgreSQL после успешной загрузки данных.
+
+### 1. Просмотр списка таблиц
+
+Команда `\dt` выводит все созданные таблицы в схеме `public`:
+
+```text
+testdb=# \dt
+List of relations
+ Schema |    Name    | Type  | Owner 
+--------+------------+-------+-------
+ public | categories | table | user
+ public | currencies | table | user
+ public | offers     | table | user
+(3 rows)
+```
+
+### 2. Просмотр структуры таблицы
+
+Команда `\d offers` показывает колонки, типы данных, ограничения и индексы таблицы товаров:
+
+```text
+testdb=# \d offers
+                                    Table "public.offers"
+   Column    | Type | Collation | Nullable | Default 
+-------------+------+-----------+----------+---------
+ available   | text |           |          | 
+ id          | text |           | not null | 
+ url         | text |           |          | 
+ price       | text |           |          | 
+ currencyid  | text |           |          | 
+ categoryid  | text |           |          | 
+ picture     | text |           |          | 
+ name        | text |           |          | 
+ vendor      | text |           |          | 
+ vendorcode  | text |           | not null | 
+ description | text |           |          | 
+ param       | text |           |          | 
+ count       | text |           |          | 
+Indexes:
+    "offers_pkey" PRIMARY KEY, btree (id)
+    "offers_vendorcode_key" UNIQUE CONSTRAINT, btree (vendorcode)
+```
+
+### 3. Выборка данных
+
+Пример запроса для получения идентификатора, названия и артикула (`vendorcode`) первых 7 товаров:
+
+```sql
+SELECT id, name, vendorcode FROM offers LIMIT 7;
+```
+
+**Результат выполнения:**
+
+```text
+ id |                 name                 | vendorcode 
+----+--------------------------------------+------------
+ 47 | Стеллаж I-67                         | I-67
+ 48 | Стеллаж I-66                         | I-66
+ 50 | Стеллаж низкий I-65                  | I-65
+ 51 | Дополнительная секция стеллажа I-641 | I-641
+ 63 | Ящик подкатной I-026                 | I-026
+ 52 | Дополнительная секция стеллажа I-642 | I-642
+ 53 | Дополнительная секция узкая I-643    | I-643
+(7 rows)
+```
+
+---
 ### Работа в фоновом режиме
 
 Для отладки запускаем `docker compose up -d` без флага `--rm`. Если нам нужен постоянно работающий сервис в фоне, то вводим команду:
